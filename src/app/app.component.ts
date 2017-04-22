@@ -1,41 +1,22 @@
 import { Component } from '@angular/core';
-
-export class Hero {
-  id: number;
-  name: string;
-}
-
-const HEROES: Hero[] = [
-  { id: 11, name: 'Mr. Nice' },
-  { id: 12, name: 'Narco' },
-  { id: 13, name: 'Bombasto' },
-  { id: 14, name: 'Celeritas' },
-  { id: 15, name: 'Magneta' },
-  { id: 16, name: 'RubberMan' },
-  { id: 17, name: 'Dynama' },
-  { id: 18, name: 'Dr IQ' },
-  { id: 19, name: 'Magma' },
-  { id: 20, name: 'Tornado' }
-];
+import { Hero } from './hero';
+import { HeroDetailComponent } from './hero-detail.component';
+import { HeroService } from './hero.service';
 
 @Component({
+  providers: [HeroService],
   selector: 'my-app',
-  template: `<h1>{{title}}</h1>  
-
+  template: `
+            <h1>{{title}}</h1>
             <h2>My Heroes</h2>
-
             <ul class="heroes">
-              <li *ngFor="let hero of heroes" (click)="onSelect(hero)">
+              <li *ngFor="let hero of heroes" [class.selected] = "selectedHero === hero" (click)="onSelect(hero)">
                 <span class="badge">{{hero.id}}</span> {{hero.name}}
               </li>
             </ul>
-            <br>
-             <div *ngIf="selectedHero">
-                <label>Selected Hero Name: </label> 
-                <input [(ngModel)]="selectedHero.name" type="text" placeholder="Hero Name">
-             </div>
+            <hero-detail [hero]="selectedHero"></hero-detail>
              `,
-  styles:[`
+  styles: [`
               .selected {
                 background-color: #CFD8DC !important;
                 color: white;
@@ -83,14 +64,26 @@ const HEROES: Hero[] = [
                 margin-right: .8em;
                 border-radius: 4px 0 0 4px;
               }`
-            ]
+  ]
 })
-
 export class AppComponent {
+
+  constructor(private heroService: HeroService) { }
+
   title = "Tour Of Heroes";
-  heroes = HEROES;
+
+  heroes: Hero[];
   selectedHero: Hero;
-  onSelect(hero: Hero): void{ 
+
+  onSelect(hero: Hero): void {
     this.selectedHero = hero;
   };
+  getHeros(): void {
+    this.heroService.getHeroes()
+      .then(heroes => this.heroes = heroes)
+      .catch(err => alert(err));
+  }
+  ngOnInit(): void {
+    this.getHeros();
+  }
 }
